@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DTF Studio — Ecosistema de agentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#111010;--sur:#1c1b1a;--sur2:#252320;--bor:#2f2d2a;
+  --acc:#ff5f1f;--gold:#ffc542;--teal:#06d6a0;--violet:#a78bfa;--red:#e87070;
+  --txt:#f2ede8;--mut:#6b6660;
+  --f:'DM Sans',sans-serif;--fs:'Syne',sans-serif;--fm:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--f);font-weight:300;min-height:100vh}
+.app{max-width:860px;margin:0 auto;padding:32px 20px}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--bor);flex-wrap:wrap;gap:12px}
+.logo{font-family:var(--fs);font-size:22px;font-weight:800}.logo em{color:var(--acc);font-style:normal}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.b1{background:rgba(255,95,31,.12);color:var(--acc);border:1px solid rgba(255,95,31,.25)}
+.b2{background:rgba(167,139,250,.12);color:var(--violet);border:1px solid rgba(167,139,250,.25)}
+.b3{background:rgba(6,214,160,.1);color:var(--teal);border:1px solid rgba(6,214,160,.25)}
+
+/* API KEY PANEL */
+.api-panel{background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.api-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.api-input{flex:1;min-width:200px;background:var(--sur2);border:1px solid var(--bor);border-radius:9px;padding:10px 14px;font-family:var(--fm);font-size:13px;color:var(--txt);outline:none;transition:border-color .2s}
+.api-input:focus{border-color:var(--violet)}
+.api-input::placeholder{color:var(--mut);font-family:var(--f)}
+.api-save{background:var(--violet);border:none;border-radius:9px;padding:10px 18px;font-family:var(--fs);font-size:12px;font-weight:700;color:#fff;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.api-save:hover{opacity:.85}
+.api-status{font-size:11px;margin-top:8px}
+.api-status.ok{color:var(--teal)}
+.api-status.err{color:var(--red)}
+.api-note{font-size:11px;color:var(--mut);margin-top:6px;line-height:1.5}
+
+/* BOX GENERAL */
+.box{background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:20px;margin-bottom:14px}
+.lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.sublbl{font-size:11px;color:var(--mut);letter-spacing:0;text-transform:none;font-weight:300}
+
+/* STEPS */
+.step-banner{border-radius:12px;padding:16px 18px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start}
+.step-banner.s-img{background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.25)}
+.step-banner.s-desc{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.25)}
+.step-num{font-family:var(--fs);font-size:22px;font-weight:800;flex-shrink:0;line-height:1}
+.step-num.teal{color:var(--teal)}.step-num.violet{color:var(--violet)}
+.step-ttl{font-family:var(--fs);font-size:13px;font-weight:700;margin-bottom:5px}
+.step-txt{font-size:12px;color:var(--mut);line-height:1.65}
+.step-txt strong{color:var(--txt)}
+
+/* TEXTAREA / INPUTS */
+textarea,input[type=text]{width:100%;background:var(--sur2);border:1px solid var(--bor);border-radius:9px;padding:12px 14px;font-family:var(--f);font-size:14px;color:var(--txt);outline:none;resize:none;transition:border-color .2s}
+textarea:focus,input[type=text]:focus{border-color:var(--acc)}
+textarea::placeholder,input::placeholder{color:var(--mut)}
+.desc-field{font-family:var(--fm);font-size:12px;height:120px;line-height:1.7;border-color:rgba(167,139,250,.35)}
+.desc-field:focus{border-color:var(--violet)}
+.idea-field{height:68px}
+
+.desc-mode{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px}
+.desc-mode-dot{width:7px;height:7px;border-radius:50%;background:var(--mut);flex-shrink:0;transition:background .3s}
+.desc-mode-txt{color:var(--mut);transition:color .3s}
+.desc-mode.active .desc-mode-dot{background:var(--teal)}
+.desc-mode.active .desc-mode-txt{color:var(--teal)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:var(--sur2);border:1px solid var(--bor);border-radius:99px;padding:5px 13px;font-size:12px;color:var(--mut);cursor:pointer;transition:all .15s;user-select:none}
+.chip.on{background:rgba(255,95,31,.15);border-color:var(--acc);color:var(--acc)}
+
+/* GO BUTTON */
+.go{width:100%;margin-top:14px;padding:14px;background:var(--acc);border:none;border-radius:9px;font-family:var(--fs);font-size:15px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.03em;transition:opacity .2s}
+.go:hover{opacity:.85}
+.go:disabled{opacity:.35;cursor:not-allowed}
+
+/* PIPELINE */
+.pipeline{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:520px){.pipeline{grid-template-columns:1fr}}
+.ac{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:14px;transition:border-color .35s}
+.ac.run{border-color:var(--acc);animation:pu 1.4s ease-in-out infinite}
+.ac.ok{border-color:var(--teal);animation:none}
+.refiner-card{background:var(--sur);border:2px solid rgba(167,139,250,.3);border-radius:12px;padding:14px;margin-bottom:14px}
+.refiner-card.run{animation:pu 1.4s ease-in-out infinite;border-color:var(--violet)}
+.refiner-card.ok-v{border-color:var(--violet);animation:none}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.6}}
+.ah{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--bor);flex-shrink:0;transition:background .3s}
+.run .dot{background:var(--acc)}.ok .dot{background:var(--teal)}.ok-v .dot{background:var(--violet)}
+.an{font-family:var(--fs);font-size:12px;font-weight:700}
+.sp{margin-left:auto;font-size:10px;padding:2px 9px;border-radius:99px;background:var(--sur2);color:var(--mut);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.run .sp{background:rgba(255,95,31,.15);color:var(--acc)}
+.ok .sp{background:rgba(6,214,160,.15);color:var(--teal)}
+.ok-v .sp{background:rgba(167,139,250,.15);color:var(--violet)}
+.ar{font-size:10px;color:var(--mut);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
+.ao{font-size:11px;color:var(--mut);line-height:1.6;white-space:pre-wrap;max-height:80px;overflow:hidden}
+.ok .ao,.ok-v .ao{color:var(--txt)}
+
+/* PROGRESS */
+.pb{background:var(--sur2);border-radius:99px;height:3px;margin:12px 0 16px;overflow:hidden}
+.pf{height:100%;background:var(--acc);border-radius:99px;width:0;transition:width .45s ease}
+
+/* RESULTS */
+.res{display:none;border:1px solid var(--bor);border-radius:14px;overflow:hidden;margin-top:4px}
+.res.show{display:block}
+.res-hdr{background:var(--sur);padding:14px 20px;border-bottom:1px solid var(--bor);font-family:var(--fs);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.res-hdr::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--teal)}
+.res-body{padding:20px;display:flex;flex-direction:column;gap:18px}
+.sec-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.insight-grid{grid-template-columns:1fr}}
+.icard{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:14px}
+.icard-ttl{font-family:var(--fs);font-size:11px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.icard-txt{font-size:12px;color:var(--txt);line-height:1.65}
+.phrase-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:520px){.phrase-row{grid-template-columns:1fr 1fr}}
+.ph{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:12px 10px;text-align:center}
+.ph-txt{font-family:var(--fs);font-size:13px;font-weight:700;color:var(--txt);line-height:1.3}
+.ph-prod{display:block;font-size:10px;color:var(--mut);margin-top:5px;letter-spacing:.06em;text-transform:uppercase}
+.vision-used{background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;padding:14px}
+.vision-used-lbl{font-size:10px;color:var(--teal);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.vision-used-txt{font-family:var(--fm);font-size:11px;color:var(--txt);line-height:1.75;border-left:2px solid var(--teal);padding:8px 12px;word-break:break-word;white-space:pre-wrap;max-height:120px;overflow-y:auto}
+.prompt-block{background:var(--sur2);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:16px;margin-bottom:10px}
+.prompt-block-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ptag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:99px;background:rgba(167,139,250,.15);color:var(--violet);border:1px solid rgba(167,139,250,.3)}
+.pstyle{font-size:11px;color:var(--mut)}
+.pvision{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(6,214,160,.12);color:var(--teal);border:1px solid rgba(6,214,160,.25)}
+.ps{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bor)}
+.ps:last-of-type{border:none;margin:0;padding:0}
+.ps-lbl{font-size:10px;color:var(--violet);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.prompt-txt{font-family:var(--fm);font-size:11px;color:var(--txt);line-height:1.85;background:rgba(0,0,0,.3);padding:12px 14px;border-radius:8px;cursor:pointer;transition:background .15s;word-break:break-word;white-space:pre-wrap}
+.prompt-txt:hover{background:rgba(167,139,250,.1)}
+.copy-hint{font-size:10px;color:var(--mut);margin-top:5px}
+.prompt-neg{font-family:var(--fm);font-size:11px;color:var(--red);line-height:1.8;background:rgba(232,112,112,.06);padding:10px 12px;border-radius:7px;word-break:break-word}
+.pparams{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.param{background:var(--sur);border:1px solid var(--bor);border-radius:5px;padding:3px 9px;font-family:var(--fm);font-size:10px;color:var(--mut)}
+.param em{color:var(--txt);font-style:normal}
+.qa-blk{background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;padding:14px}
+.qa-item{font-size:12px;color:var(--txt);padding:3px 0;line-height:1.6;display:flex;gap:8px}
+.qa-item::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0}
+.cp-all{width:100%;margin-top:12px;padding:10px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:8px;font-family:var(--fs);font-size:12px;font-weight:700;color:var(--violet);cursor:pointer;transition:background .15s}
+.cp-all:hover{background:rgba(167,139,250,.22)}
+
+/* FOOTER */
+.footer{text-align:center;padding:32px 0 16px;font-size:11px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="logo">DTF<em>Studio</em></div>
+    <div class="badges">
+      <div class="badge b1">5 agentes IA</div>
+      <div class="badge b2">Refinador de prompts</div>
+      <div class="badge b3">Imagen → descripción</div>
+    </div>
+  </div>
+
+  <!-- API KEY -->
+  <div class="api-panel">
+    <div class="lbl">API Key de Anthropic <span class="sublbl">— se guarda solo en tu navegador, nunca sale de tu dispositivo</span></div>
+    <div class="api-row">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
+      <button class="api-save" onclick="saveKey()">Guardar key</button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+    <div class="api-note">Tu key se guarda en localStorage de tu navegador. Nunca se envía a ningún servidor externo — solo va directo a api.anthropic.com cuando generas.</div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="box">
+    <!-- PASO 1: instrucción de imagen -->
+    <div class="step-banner s-img">
+      <div class="step-num teal">1</div>
+      <div class="step-body">
+        <div class="step-ttl">¿Tienes imagen de referencia?</div>
+        <div class="step-txt">Súbela en el chat de <strong>Claude.ai</strong> y escribe: <strong>"analiza esta imagen para DTF"</strong>. Claude te devolverá una descripción visual completa. Luego pégala abajo.</div>
+      </div>
+    </div>
+
+    <!-- PASO 2: descripción visual -->
+    <div class="step-banner s-desc">
+      <div class="step-num violet">2</div>
+      <div class="step-body" style="width:100%">
+        <div class="step-ttl">Pega aquí la descripción visual de Claude</div>
+        <div class="step-txt" style="margin-bottom:10px">Opcional — si no tienes imagen, déjalo vacío y el sistema genera desde tu idea.</div>
+        <textarea class="desc-field" id="visionInput" placeholder="Pega aquí la descripción que Claude generó de tu imagen...&#10;&#10;Ejemplo: 'Minimalist line art logo, bicycle wheel drawn with single medium-weight black stroke, no fill, the word RIDE in bold condensed sans-serif...'"></textarea>
+        <div class="desc-mode" id="descMode">
+          <div class="desc-mode-dot"></div>
+          <div class="desc-mode-txt">Sin descripción — se generará desde el texto de idea</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3: idea y productos -->
+    <div class="lbl">Idea o contexto <span class="sublbl">— para quién es, qué quieres lograr, qué emoción transmitir</span></div>
+    <textarea class="idea-field" id="inp" placeholder="Ej: logo delicado para buzos de ciclistas, hombres mujeres y niños apasionados por la bici en todas sus modalidades..."></textarea>
+
+    <div class="lbl" style="margin-top:16px">Productos</div>
+    <div class="chips" id="prod">
+      <div class="chip on" data-v="camiseta">Camiseta / Buzo</div>
+      <div class="chip on" data-v="pocillo">Pocillo</div>
+      <div class="chip on" data-v="termo">Termo</div>
+      <div class="chip on" data-v="cachucha">Cachucha</div>
+      <div class="chip" data-v="vaso">Vaso</div>
+      <div class="chip" data-v="tote bag">Tote bag</div>
+    </div>
+
+    <button class="go" id="btn" onclick="run()">Activar ecosistema → 5 agentes</button>
+  </div>
+
+  <!-- PIPELINE DE AGENTES -->
+  <div class="pipeline">
+    <div class="ac" id="c-mkt">
+      <div class="ah"><div class="dot"></div><div class="an">Agente marketing</div><div class="sp" id="s-mkt">Espera</div></div>
+      <div class="ar">Tendencias · Nichos · Timing</div>
+      <div class="ao" id="o-mkt">Analizará el mercado para tu idea.</div>
+    </div>
+    <div class="ac" id="c-pub">
+      <div class="ah"><div class="dot"></div><div class="an">Agente publicista</div><div class="sp" id="s-pub">Espera</div></div>
+      <div class="ar">Concepto · Copy · Frases</div>
+      <div class="ao" id="o-pub">Creará frases y concepto creativo.</div>
+    </div>
+    <div class="ac" id="c-dis">
+      <div class="ah"><div class="dot"></div><div class="an">Agente diseñador</div><div class="sp" id="s-dis">Espera</div></div>
+      <div class="ar">Imagen → descripción / Texto → concepto</div>
+      <div class="ao" id="o-dis">Esperando descripción visual o idea de texto.</div>
+    </div>
+    <div class="ac" id="c-qa">
+      <div class="ah"><div class="dot"></div><div class="an">Agente QA / DTF</div><div class="sp" id="s-qa">Espera</div></div>
+      <div class="ar">Resolución · Fondo · Colores</div>
+      <div class="ao" id="o-qa">Validará requisitos técnicos DTF.</div>
+    </div>
+  </div>
+  <div class="refiner-card" id="c-ref">
+    <div class="ah"><div class="dot"></div><div class="an" style="color:var(--violet)">Agente refinador de prompts</div><div class="sp" id="s-ref">Espera</div></div>
+    <div class="ar" style="color:rgba(167,139,250,.5)">Descripción visual real → prompt autocontenido · Artista · Técnica · Producto · Specs DTF</div>
+    <div class="ao" id="o-ref">Construye el prompt final usando la descripción visual como núcleo. Añade técnica de trazo, adaptación al producto y specs DTF.</div>
+  </div>
+
+  <div class="pb"><div class="pf" id="pf"></div></div>
+
+  <!-- RESULTADOS -->
+  <div class="res" id="res">
+    <div class="res-hdr">Pack DTF generado</div>
+    <div class="res-body" id="res-body"></div>
+  </div>
+
+  <div class="footer">DTF Studio · Construido con Claude · Uso personal</div>
+</div>
+
+<script>
+// ── API KEY ──────────────────────────────────────────
+let API_KEY = localStorage.getItem('dtf_api_key') || '';
+if(API_KEY){
+  document.getElementById('apiKeyInput').value = API_KEY;
+  document.getElementById('apiStatus').textContent = '✓ API key cargada desde tu navegador';
+  document.getElementById('apiStatus').className = 'api-status ok';
+}
+function saveKey(){
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if(!k.startsWith('sk-ant-')){
+    document.getElementById('apiStatus').textContent = 'La key debe empezar con sk-ant-...';
+    document.getElementById('apiStatus').className = 'api-status err';
+    return;
+  }
+  API_KEY = k;
+  localStorage.setItem('dtf_api_key', k);
+  document.getElementById('apiStatus').textContent = '✓ Guardada correctamente en tu navegador';
+  document.getElementById('apiStatus').className = 'api-status ok';
+}
+
+// ── CHIPS ────────────────────────────────────────────
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('on')));
+const getChips = id => [...document.querySelectorAll(`#${id} .chip.on`)].map(c=>c.dataset.v);
+const setP = p => document.getElementById('pf').style.width = p+'%';
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// Detectar descripción pegada
+document.getElementById('visionInput').addEventListener('input', function(){
+  const mode = document.getElementById('descMode');
+  if(this.value.trim().length > 30){
+    mode.className = 'desc-mode active';
+    mode.querySelector('.desc-mode-txt').textContent = '✓ Descripción visual detectada — será el núcleo del prompt';
+  } else {
+    mode.className = 'desc-mode';
+    mode.querySelector('.desc-mode-txt').textContent = 'Sin descripción — se generará desde el texto de idea';
+  }
+});
+
+// ── LLAMADA A CLAUDE API ──────────────────────────────
+async function callClaude(system, user){
+  if(!API_KEY) throw new Error('Primero guarda tu API key arriba');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system,
+      messages: [{ role: 'user', content: user }]
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.content?.[0]?.text?.trim() || '';
+}
+
+// ── AGENTES ──────────────────────────────────────────
+function setAgent(id, state, txt){
+  const el=document.getElementById('c-'+id);
+  const sp=document.getElementById('s-'+id);
+  const out=document.getElementById('o-'+id);
+  if(id==='ref') el.className='refiner-card '+(state==='run'?'run':state==='ok'?'ok-v':'');
+  else el.className='ac '+(state==='run'?'run':state==='ok'?'ok':'');
+  sp.textContent = state==='run'?'Procesando':state==='ok'?'Listo':'Espera';
+  if(txt) out.textContent = txt;
+}
+
+// ── AGENTE MARKETING ─────────────────────────────────
+async function agentMarketing(idea, prods){
+  const txt = await callClaude(
+    'Eres un agente de marketing especializado en tendencias para productos impresos en DTF y sublimación en Colombia y LATAM. Responde siempre en español, de forma concisa.',
+    `Idea: "${idea}"\nProductos: ${prods.join(', ')}\n\nAnaliza en máximo 120 palabras:\n1. Tendencias actuales relevantes (TikTok/Instagram/fechas clave)\n2. Nicho de audiencia con mayor potencial\n3. Timing recomendado para lanzar\nUsa bullet points cortos.`
+  );
+  return txt;
+}
+
+// ── AGENTE PUBLICISTA ────────────────────────────────
+async function agentPublicista(idea, prods, mktInsight){
+  const txt = await callClaude(
+    'Eres un agente publicista creativo especializado en frases y conceptos para productos sublimados y DTF. Tu fuerte son las frases cortas, impactantes y virales. Responde en español.',
+    `Idea: "${idea}"\nProductos: ${prods.join(', ')}\nInsight de marketing: ${mktInsight.substring(0,200)}\n\nCrea:\n1. Concepto creativo central (1 oración)\n2. Exactamente 6 frases cortas listas para imprimir (máx 5 palabras cada una)\n3. Tono y emoción que debe transmitir\n\nFormato de respuesta para las frases:\nFRASES:\n- frase 1\n- frase 2\n(etc)`
+  );
+  return txt;
+}
+
+// ── AGENTE DISEÑADOR ─────────────────────────────────
+async function agentDiseñador(idea, vision, pub){
+  if(vision && vision.length > 30){
+    return {
+      source: 'image',
+      drafts: [
+        { lbl: 'Fiel a la referencia', var: 'Recreación directa del estilo visual', core: vision },
+        { lbl: 'Variación bold', var: 'Mismo estilo, más peso tipográfico', core: vision + ', bolder typography, more dominant text weight, stronger visual impact, larger letterforms' },
+        { lbl: 'Variación minimal', var: 'Reducido al elemento más esencial', core: vision + ', stripped to single most essential element, maximum negative space, simplified logo-grade version' }
+      ]
+    };
+  }
+  // Modo texto: pedir al agente que genere conceptos
+  const txt = await callClaude(
+    'Eres un agente diseñador gráfico especialista en diseños para DTF y sublimación. Generas descripciones visuales precisas para Midjourney. Responde en inglés.',
+    `Design concept for: "${idea}"\nProducts: ${pub.substring(0,150)}\n\nGenerate exactly 3 design concepts as English visual descriptions (each 2-3 sentences). Each should be a different style:\n1. Bold typographic\n2. Illustrated character/icon\n3. Minimal logo\n\nFormat:\nCONCEPT1: [description]\nCONCEPT2: [description]\nCONCEPT3: [description]`
+  );
+  const concepts = ['Bold typographic design', 'Illustrated cartoon style', 'Minimal logo design'];
+  const matches = txt.match(/CONCEPT\d:\s*(.+?)(?=CONCEPT\d:|$)/gs) || [];
+  const cores = matches.map(m => m.replace(/CONCEPT\d:\s*/,'').trim());
+  return {
+    source: 'text',
+    drafts: [
+      { lbl: 'Bold tipográfico', var: 'Texto dominante', core: cores[0] || concepts[0] },
+      { lbl: 'Ilustrado', var: 'Personaje o ícono', core: cores[1] || concepts[1] },
+      { lbl: 'Minimal', var: 'Logo limpio', core: cores[2] || concepts[2] }
+    ]
+  };
+}
+
+// ── AGENTE QA ────────────────────────────────────────
+function agentQA(prods){
+  return [
+    'Resolución mínima 300 DPI — ideal 400 DPI para detalles finos',
+    'PNG-32 con canal alfa, fondo 100% transparente, sin píxeles blancos residuales',
+    'Modo color: sRGB para envío digital / CMYK si la imprenta lo requiere',
+    prods.includes('camiseta') && 'Camiseta/Buzo: pecho máx 30×40 cm · bolsillo 12×12 cm',
+    prods.includes('pocillo') && 'Pocillo 11oz: área envolvente 20×9 cm — diseño cierra al curvar',
+    prods.includes('termo') && 'Termo 500ml: área 22×8 cm — no texto crítico cerca de bordes',
+    prods.includes('cachucha') && 'Cachucha: parche 7×5 cm — sin líneas < 1.5mm',
+    prods.includes('vaso') && 'Vaso: área 21×9 cm — aplican reglas del pocillo',
+    'Contorno blanco 1.5–2mm (choke) para telas oscuras en DTF directo',
+    'Colores planos rinden mejor que semitonos en algodón y poliéster',
+    'Evitar grises < 15% — se pierden en la transferencia térmica',
+    'Trazos < 0.5mm pueden desaparecer — reforzar a mínimo 1pt',
+  ].filter(Boolean);
+}
+
+// ── AGENTE REFINADOR ─────────────────────────────────
+async function agentRefinador(idea, disData, prods){
+  const techDTF = 'isolated on completely transparent background, no background color fill, no drop shadow, no outer glow, crisp clean edges, alpha channel preserved, print-ready PNG 300 DPI minimum, CMYK-safe colors';
+  const prodNote = p => {
+    if(p==='camiseta') return 'centered for chest print max 30x40cm, vertical or square, strong silhouette at distance';
+    if(p==='pocillo') return 'horizontal wrap 20x9cm, reads left to right, no critical detail near seam edges';
+    if(p==='cachucha') return 'compact patch max 7x5cm, no detail smaller than 2mm';
+    if(p==='termo') return 'cylindrical wrap 22x8cm, flows naturally on curved surface';
+    return 'strong centered focal point';
+  };
+  const buildNeg = core => {
+    const c = core.toLowerCase();
+    let base = 'any background color, white background, gradient background, drop shadow, outer glow, ';
+    if(c.includes('cartoon')||c.includes('sticker')) return base+'photorealistic, 3D render, thin fragile lines, watermark, blurry edges';
+    if(c.includes('minimal')||c.includes('line art')||c.includes('thin stroke')) return base+'color fills, gradients, thick bold lines, decorative ornaments, multiple colors, photorealistic';
+    if(c.includes('bold')||c.includes('poster')||c.includes('constructivist')) return base+'photorealistic, 3D render, gradients, thin delicate lines, more than 3 colors';
+    return base+'photorealistic, 3D render, gradients, watermark, blurry';
+  };
+  const buildParams = core => {
+    const c = core.toLowerCase();
+    if(c.includes('minimal')||c.includes('line art')) return {'--ar':'1:1','--style':'raw','--stylize':'200','--v':'6.1'};
+    if(c.includes('cartoon')||c.includes('sticker')||c.includes('character')) return {'--ar':'1:1','--style':'raw','--stylize':'750','--v':'6.1'};
+    return {'--ar':'1:1','--style':'raw','--stylize':'500','--v':'6.1'};
+  };
+
+  const mainProd = prods[0] || 'camiseta';
+  const results = [];
+
+  for(let i = 0; i < disData.drafts.length; i++){
+    const draft = disData.drafts[i];
+    let prompt;
+    if(disData.source === 'image'){
+      // Imagen: la descripción real ES el núcleo — solo añadir producto + DTF
+      prompt = draft.core + ', ' + prodNote(mainProd) + ', ' + techDTF;
+    } else {
+      // Texto: pedir a Claude que refine el prompt con contexto artístico completo
+      const refined = await callClaude(
+        'You are a professional prompt engineer for Midjourney and DALL-E. Create self-contained, detailed prompts that describe visual style, lighting, composition, and technical specs. Never reference external images.',
+        `Base concept: "${draft.core}"\nProduct: ${mainProd}\nProduct spec: ${prodNote(mainProd)}\nDTF specs: ${techDTF}\n\nWrite ONE refined Midjourney prompt (2-3 sentences) that adds: artistic reference, linework style, color palette description, lighting, and composition. Make it completely self-contained. Output ONLY the prompt text, nothing else.`
+      );
+      prompt = (refined || draft.core) + ', ' + prodNote(mainProd) + ', ' + techDTF;
+    }
+    results.push({
+      lbl: draft.lbl, variacion: draft.var,
+      prompt, negative: buildNeg(draft.core),
+      params: buildParams(draft.core),
+      fromImage: disData.source === 'image'
+    });
+  }
+  return results;
+}
+
+// ── PARSEAR FRASES DEL PUBLICISTA ────────────────────
+function parseFrases(pubTxt, prods){
+  const lines = pubTxt.split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/,'').trim());
+  const fallback = ['Sin miedo','Born different','Modo ON','Para los que saben','Auténtico','Sin filtros'];
+  const src = lines.length >= 3 ? lines : fallback;
+  return src.slice(0,6).map((txt,i) => ({ txt, prod: prods[i % prods.length] || prods[0] }));
+}
+
+// ── ORQUESTADOR PRINCIPAL ────────────────────────────
+async function run(){
+  if(!API_KEY){
+    alert('Primero guarda tu API key de Anthropic arriba');
+    return;
+  }
+  const vision = document.getElementById('visionInput').value.trim();
+  const idea = document.getElementById('inp').value.trim() || 'diseño para DTF';
+  const prods = getChips('prod');
+  if(!prods.length){ alert('Selecciona al menos un producto'); return; }
+
+  const btn = document.getElementById('btn');
+  btn.disabled = true;
+  btn.textContent = vision.length > 30 ? 'Generando desde tu imagen...' : 'Activando agentes...';
+  document.getElementById('res').classList.remove('show');
+  setP(0);
+
+  try {
+    // Agente 1: Marketing
+    setAgent('mkt','run');
+    const mkt = await agentMarketing(idea, prods);
+    setAgent('mkt','ok', mkt.substring(0,120)+'...');
+    setP(18);
+
+    // Agente 2: Publicista
+    setAgent('pub','run');
+    const pub = await agentPublicista(idea, prods, mkt);
+    setAgent('pub','ok', pub.substring(0,100)+'...');
+    setP(36);
+
+    // Agente 3: Diseñador
+    setAgent('dis','run');
+    const dis = await agentDiseñador(idea, vision, pub);
+    setAgent('dis','ok', dis.source==='image'
+      ? '3 variaciones desde descripción visual real'
+      : `${dis.drafts.length} conceptos generados`
+    );
+    setP(54);
+
+    // Agente 4: QA
+    setAgent('qa','run');
+    await sleep(400);
+    const qa = agentQA(prods);
+    setAgent('qa','ok', `${qa.length} criterios validados para: ${prods.join(', ')}`);
+    setP(70);
+
+    // Agente 5: Refinador
+    setAgent('ref','run');
+    const refined = await agentRefinador(idea, dis, prods);
+    setAgent('ref','ok', vision.length > 30
+      ? 'Prompts desde descripción visual real — specs DTF integradas'
+      : 'Prompts refinados — artista, técnica, producto y specs DTF integrados'
+    );
+    setP(100);
+
+    renderResults(idea, prods, vision, mkt, pub, dis, qa, refined);
+
+  } catch(err) {
+    setP(0);
+    ['mkt','pub','dis','qa','ref'].forEach(id => setAgent(id,'',''));
+    alert('Error: ' + err.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generar nuevos diseños →';
+}
+
+// ── RENDER RESULTADOS ────────────────────────────────
+function renderResults(idea, prods, vision, mkt, pub, dis, qa, refined){
+  const hasV = vision.length > 30;
+  const frases = parseFrases(pub, prods);
+  const allTxt = refined.map((r,i) =>
+    `=== DISEÑO ${i+1}: ${r.lbl.toUpperCase()} ===\n\nPROMPT:\n${r.prompt}\n\nNEGATIVO:\n${r.negative}\n\nPARÁMETROS: ${Object.entries(r.params).map(([k,v])=>k+' '+v).join('  ')}`
+  ).join('\n\n' + '─'.repeat(60) + '\n\n');
+
+  const html = `
+    ${hasV ? `<div>
+      <div class="sec-lbl">Descripción visual usada como núcleo</div>
+      <div class="vision-used">
+        <div class="vision-used-lbl">Texto de tu imagen — generado por Claude</div>
+        <div class="vision-used-txt">${escHtml(vision)}</div>
+      </div>
+    </div>` : ''}
+
+    <div>
+      <div class="sec-lbl">Análisis de mercado</div>
+      <div class="icard"><div class="icard-ttl">Insight del agente de marketing</div><div class="icard-txt">${escHtml(mkt)}</div></div>
+    </div>
+
+    <div>
+      <div class="sec-lbl">Frases listas para sublimar</div>
+      <div class="phrase-row">${frases.map(f=>`
+        <div class="ph">
+          <div class="ph-txt">${escHtml(f.txt)}</div>
+          <span class="ph-prod">${escHtml(f.prod)}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-lbl" style="color:var(--violet)">Prompts para Midjourney / DALL·E / Stable Diffusion</div>
+      <div style="font-size:11px;color:var(--mut);margin-bottom:14px">Clic en el prompt para copiar al portapapeles.</div>
+      ${refined.map((r,i) => `
+        <div class="prompt-block">
+          <div class="prompt-block-hdr">
+            <div class="ptag">Diseño ${i+1} — ${escHtml(r.lbl)}</div>
+            <div class="pstyle">${escHtml(r.variacion)}</div>
+            ${r.fromImage ? '<div class="pvision">✓ Desde imagen real</div>' : ''}
+          </div>
+          <div class="ps">
+            <div class="ps-lbl">Prompt positivo</div>
+            <div class="prompt-txt" onclick="selCopy(this,${i})">${escHtml(r.prompt)}</div>
+            <div class="copy-hint" id="hint-${i}">↑ Toca para copiar</div>
+          </div>
+          <div class="ps">
+            <div class="ps-lbl">Prompt negativo</div>
+            <div class="prompt-neg">${escHtml(r.negative)}</div>
+          </div>
+          <div>
+            <div class="ps-lbl">Parámetros Midjourney</div>
+            <div class="pparams">${Object.entries(r.params).map(([k,v])=>`<div class="param">${k} <em>${v}</em></div>`).join('')}</div>
+          </div>
+        </div>`).join('')}
+      <button class="cp-all" id="cpAllBtn" onclick="cpAll()">Copiar todos los prompts</button>
+    </div>
+
+    <div>
+      <div class="sec-lbl">Checklist técnico DTF</div>
+      <div class="qa-blk">${qa.map(q=>`<div class="qa-item">${escHtml(q)}</div>`).join('')}</div>
+    </div>
+  `;
+
+  document.getElementById('res-body').innerHTML = html;
+  document.getElementById('res').classList.add('show');
+  document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window._allTxt = allTxt;
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function selCopy(el, i){
+  const sel=window.getSelection(), r=document.createRange();
+  r.selectNodeContents(el); sel.removeAllRanges(); sel.addRange(r);
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    const h=document.getElementById('hint-'+i);
+    if(h){ const p=h.innerHTML; h.innerHTML='<span style="color:var(--teal)">✓ Copiado</span>'; setTimeout(()=>h.innerHTML=p,1500); }
+    const o=el.style.background; el.style.background='rgba(167,139,250,.18)'; setTimeout(()=>el.style.background=o,800);
+  });
+}
+
+function cpAll(){
+  navigator.clipboard.writeText(window._allTxt||'').then(()=>{
+    const b=document.getElementById('cpAllBtn');
+    b.textContent='¡Copiados ✓';
+    setTimeout(()=>b.textContent='Copiar todos los prompts',2500);
+  });
+}
+</script>
+</body>
+</html>
